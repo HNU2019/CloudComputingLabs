@@ -2,6 +2,9 @@ package sudoku;
 
 import java.io.*;
 import java.util.Scanner;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 public class Main {
     public static void main(String[] args) throws IOException {
@@ -17,8 +20,17 @@ public class Main {
         BufferedReader bf = new BufferedReader(new InputStreamReader(file));
 
         char[] problem = bf.readLine().toCharArray();
-        System.out.println(problem.length);
-        for (char c : problem) System.out.print(c + " ");
-        System.out.println();
+//        // 检查文件是否读取成功
+//        System.out.println(problem.length);
+//        for (char c : problem) System.out.print(c + " ");
+//        System.out.println();
+        bf.close();
+
+        int coresNum=Runtime.getRuntime().availableProcessors();
+//        System.out.println(coresNum);
+        LinkedBlockingQueue<Runnable> threadQueue=new LinkedBlockingQueue(5);
+        ThreadPoolExecutor threadPool=new ThreadPoolExecutor(coresNum,2*coresNum,
+                10L, TimeUnit.MILLISECONDS,threadQueue);
+
     }
 }
