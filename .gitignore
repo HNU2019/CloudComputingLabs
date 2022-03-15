@@ -11,3 +11,6 @@
 .idea
 *.iml
 out
+
+# 不用的测试文件
+test.java
