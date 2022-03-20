@@ -13,52 +13,45 @@ public class Main {
         path+="/Lab1/src/Sudoku/";
 
 //        path+=sc.next();
-        path+="test1"; //这一行以后要注释掉
+//        path+="test1";
 //        path+="test1000";
-//        path+="test10000";
-        System.out.println(path);
+        path+="test10000";
+        System.out.println("文件路径是: "+path);
 
+        //创建线程池
+        int coresNum=Runtime.getRuntime().availableProcessors(); //获取cpu核心数
+//        System.out.println("核心数："+coresNum);
+        LinkedBlockingQueue<Runnable> threadQueue=new LinkedBlockingQueue();
+        ThreadPoolExecutor threadPool=new ThreadPoolExecutor(coresNum,coresNum*2,
+                10L, TimeUnit.MILLISECONDS,threadQueue);
+        ArrayList<FutureTask> task=new ArrayList<>();  //任务队列
+
+        /**********计时开始************/
+        long beginTime=System.nanoTime();
+        //读文件
         InputStream file = new FileInputStream(path);
         BufferedReader bf = new BufferedReader(new InputStreamReader(file));
-        ArrayList<char[]> problem=new ArrayList<>();
         ArrayList<char[][]> ans=new ArrayList<>();
 
         while(true){
             String str=bf.readLine();
             if(str==null) break;
             char[] p=str.toCharArray();
-            problem.add(p);
-        }
-
-        // 检查文件是否读取成功
-//        System.out.println(problem.length);
-//        for (int i=0;i<9;i++){
-//            for(int j=0;j<9;j++){
-//                System.out.print(problem[i*9+j]+" ");
+            // 检查文件是否读取成功
+//            for (int i=0;i<9;i++){
+//                for(int j=0;j<9;j++){
+//                    System.out.print(p[i*9+j]+" ");
+//                }
+//                System.out.println();
 //            }
 //            System.out.println();
-//        }
-//        System.out.println();
+//            task.add(new FutureTask(new BasicThread((p))));  //暴力回溯
+            task.add(new FutureTask(new DancingLink(p)));  //舞蹈链
+
+            threadPool.submit(task.get(task.size()-1));
+        }
+
         bf.close();
-        System.out.println("The problem size is: "+problem.size());
-
-        /*
-        //创建线程池
-        int coresNum=Runtime.getRuntime().availableProcessors(); //获取cpu核心数
-        System.out.println("核心数："+coresNum);
-        LinkedBlockingQueue<Runnable> threadQueue=new LinkedBlockingQueue();
-        ThreadPoolExecutor threadPool=new ThreadPoolExecutor(coresNum,coresNum*2,
-                10L, TimeUnit.MILLISECONDS,threadQueue);
-
-        ArrayList<FutureTask> task=new ArrayList<>();
-        for(char[] p:problem){
-            task.add(new FutureTask(new BasicThread(p)));
-        }
-
-        long beginTime=System.nanoTime();
-        for(FutureTask futureTask:task){
-            threadPool.submit(futureTask);
-        }
 
         for(FutureTask f:task){
             while(true) {
@@ -80,24 +73,22 @@ public class Main {
                     break;
                 }else {
                     try {
-                        Thread.sleep(10);
+                        Thread.sleep(20);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
                 }
             }
         }
-        for(char[][] i:ans){
-            for(char[] ch:i){
-                for(char c:ch) System.out.print(c);
-            }
-        }
-        System.out.println();
+//        for(char[][] i:ans){
+//            for(char[] ch:i){
+//                for(char c:ch) System.out.print(c);
+//            }
+//        }
+//        System.out.println();
 
         long endTime=System.nanoTime();
         System.out.println("时间耗费为："+(endTime-beginTime)/1000+" us\n");
         threadPool.shutdown();
-
-         */
     }
 }
