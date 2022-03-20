@@ -3,7 +3,6 @@ package sudoku;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Scanner;
-import java.util.Vector;
 import java.util.concurrent.*;
 
 public class Main {
@@ -45,13 +44,13 @@ public class Main {
         //创建线程池
         int coresNum=Runtime.getRuntime().availableProcessors(); //获取cpu核心数
         System.out.println("核心数："+coresNum);
-        LinkedBlockingQueue<Runnable> threadQueue=new LinkedBlockingQueue(100000);
+        LinkedBlockingQueue<Runnable> threadQueue=new LinkedBlockingQueue();
         ThreadPoolExecutor threadPool=new ThreadPoolExecutor(coresNum,coresNum*2,
                 10L, TimeUnit.MILLISECONDS,threadQueue);
 
         ArrayList<FutureTask> task=new ArrayList<>();
         for(char[] p:problem){
-            task.add(new FutureTask(new SudokuThread(p)));
+            task.add(new FutureTask(new BasicThread(p)));
         }
 
         long beginTime=System.nanoTime();
@@ -70,10 +69,11 @@ public class Main {
                     } catch (ExecutionException e) {
                         e.printStackTrace();
                     }
-//                    for(char[] ch:res){
-//                        for(char c:ch) System.out.print(c);
-//                    }
-//                    System.out.println(" [Thread size: "+threadPool.getPoolSize()+"]");
+                    for(char[] ch:res){
+                        for(char c:ch) System.out.print(c);
+                    }
+                    System.out.println(" [Thread size: "+threadPool.getPoolSize()+"]");
+
                     ans.add(res);
                     break;
                 }else {

@@ -2,7 +2,7 @@ package sudoku;
 
 import java.util.concurrent.Callable;
 
-public class SudokuThread implements Callable {
+public class BasicThread implements Callable {
     public char[][] ans = new char[9][9];  //存放解
     //记录某行、列、宫中某个数字是否已填写
     //行代表数独中的某行(列、宫)，列代表填的是哪个数字
@@ -10,7 +10,7 @@ public class SudokuThread implements Callable {
     private boolean[][] col = new boolean[10][10];
     private boolean[][] block = new boolean[10][10];
 
-    public SudokuThread(char[] problem) {
+    public BasicThread(char[] problem) {
         for (int i = 1; i <= 81; i++) {
             int r = (i + 8) / 9;
             int c = i - (r - 1) * 9;
