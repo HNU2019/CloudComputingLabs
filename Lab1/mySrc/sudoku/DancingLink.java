@@ -1,4 +1,4 @@
-package sudoku;
+package mySrc.sudoku;
 
 import java.util.Vector;
 import java.util.concurrent.Callable;
@@ -16,21 +16,20 @@ public class DancingLink implements Callable {
     public final int spaces[] = new int[N];
     //public final int nspaces;
     public final int[][] chess = new int[N][];
-    public class Node{
-        Node left;
-        Node right;
-        Node up;
-        Node down;
-        Column col;
-        int name;
-        int size;
-    }
+
     public class Column extends Node{ } //使typedef Node Column;
 
     public final int kMaxNodes = 1 + 81*4 + 9*9*9*4;
     public final int kMaxColumns = 400;
     public final int kRow = 100, kCol = 200, kBox = 300;
 
+    public Dance getDance(int inout[]){
+        return new Dance(inout);
+    }
+
+    /**
+     * 内部类，传入inout，传出ans
+     */
     public class Dance {
         Column root_;
         int[] inout_;
@@ -39,7 +38,20 @@ public class DancingLink implements Callable {
         Node nodes_[] = new Node[kMaxNodes];
         int cur_node_;
 
+        /**
+         * 构造代码块，将nodes_的每个元素赋予地址
+         */
+//        {
+//            for(int i=0;i<kMaxNodes;i++){
+//                nodes_[i] = new Column();
+//            }
+//        }
+
         public Column new_column(int n) {
+            for(int i=0;i<kMaxNodes;i++){
+                nodes_[i] = new Column();
+            }
+
             assert (cur_node_ < kMaxNodes);
             Column c = (Column) nodes_[cur_node_++];
             //memset(c, 0, sizeof(Column));
@@ -269,10 +281,44 @@ public class DancingLink implements Callable {
             old.size++;
             nnew.col = old;
         }
+
+        public int[][] getAns(){
+            solve();
+            int ans[][] = new int[9][9];
+            int pos=0;
+            for(int i=0;i<9;i++){
+                for(int j=0;j<9;j++){
+                    ans[i][j] = inout_[pos++];
+                }
+            }
+            return ans;
+        }
     }
 
     @Override
-    public Object call() throws Exception {
-        return null;
+    public char[] call() throws Exception {
+        return new char[]{};
     }
+
+    public static void main(String[] args) {
+        int inout[] = new int[]{0,0,0,0,0,0,0,1,0,4,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,5,0,4,0,7,0,0,8,0,0,0,3,0,0,0,0,1,0,9,0,0,0,0,3,0,0,4,0,0,2,0,0,0,5,0,1,0,0,0,0,0,0,0,0,8,0,6,0,0,0};
+        DancingLink dancingLinks = new DancingLink();
+        Dance dance = dancingLinks.getDance(inout);
+        int[][] ans = dance.getAns();
+        for(int i=0;i<9;i++){
+            for(int j=0;j<9;j++){
+                System.out.print(ans[i][j]);
+            }
+        }
+    }
+}
+
+class Node{
+    Node left;
+    Node right;
+    Node up;
+    Node down;
+    DancingLink.Column col;
+    int name;
+    int size;
 }

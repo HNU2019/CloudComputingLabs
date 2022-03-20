@@ -1,4 +1,4 @@
-package sudoku;
+package mySrc.sudoku;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -13,9 +13,10 @@ public class Main {
         path+="/Lab1/src/Sudoku/";
 
 //        path+=sc.next();
-//        path+="test1"; //这一行以后要注释掉
-        path+="test1000";
+        path+="test1"; //这一行以后要注释掉
+//        path+="test1000";
 //        path+="test10000";
+        System.out.println(path);
 
         InputStream file = new FileInputStream(path);
         BufferedReader bf = new BufferedReader(new InputStreamReader(file));
@@ -41,6 +42,7 @@ public class Main {
         bf.close();
         System.out.println("The problem size is: "+problem.size());
 
+        /*
         //创建线程池
         int coresNum=Runtime.getRuntime().availableProcessors(); //获取cpu核心数
         System.out.println("核心数："+coresNum);
@@ -95,5 +97,7 @@ public class Main {
         long endTime=System.nanoTime();
         System.out.println("时间耗费为："+(endTime-beginTime)/1000+" us\n");
         threadPool.shutdown();
+
+         */
     }
 }

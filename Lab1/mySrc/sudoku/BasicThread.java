@@ -1,4 +1,4 @@
-package sudoku;
+package mySrc.sudoku;
 
 import java.util.concurrent.Callable;
 
