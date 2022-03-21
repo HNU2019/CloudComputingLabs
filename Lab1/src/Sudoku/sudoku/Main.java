@@ -11,10 +11,10 @@ public class Main {
         Scanner sc = new Scanner(System.in);
 
         String path=System.getProperty("user.dir");
-        path+="/Lab1/src/Sudoku/";
+//        path+="/Lab1/src/Sudoku";
 
 
-        path+=sc.next();
+        path=path+"/"+sc.next();
 //        path+="test1";
 //        path+="test1000";
 //        path+="test10000";
