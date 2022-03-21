@@ -6,17 +6,17 @@ import java.util.Scanner;
 import java.util.concurrent.*;
 
 public class Main {
-    public static void main(String[] args) throws IOException {
+    public static void test(String[] args) throws IOException {
         Scanner sc = new Scanner(System.in);
 
         String path=System.getProperty("user.dir");
         path+="/Lab1/src/Sudoku/";
 
-//        path+=sc.next();
+        path+=sc.next();
 //        path+="test1";
 //        path+="test1000";
-        path+="test10000";
-        System.out.println("文件路径是: "+path);
+//        path+="test10000";
+//        System.out.println("文件路径是: "+path);
 
         //创建线程池
         int coresNum=Runtime.getRuntime().availableProcessors(); //获取cpu核心数
@@ -27,7 +27,7 @@ public class Main {
         ArrayList<FutureTask> task=new ArrayList<>();  //任务队列
 
         /**********计时开始************/
-        long beginTime=System.nanoTime();
+//        long beginTime=System.nanoTime();
         //读文件
         InputStream file = new FileInputStream(path);
         BufferedReader bf = new BufferedReader(new InputStreamReader(file));
@@ -64,10 +64,10 @@ public class Main {
                     } catch (ExecutionException e) {
                         e.printStackTrace();
                     }
-                    for(char[] ch:res){
-                        for(char c:ch) System.out.print(c);
-                    }
-                    System.out.println(" [Thread size: "+threadPool.getPoolSize()+"]");
+//                    for(char[] ch:res){
+//                        for(char c:ch) System.out.print(c);
+//                    }
+//                    System.out.println(" [Thread size: "+threadPool.getPoolSize()+"]");
 
                     ans.add(res);
                     break;
@@ -80,15 +80,15 @@ public class Main {
                 }
             }
         }
-//        for(char[][] i:ans){
-//            for(char[] ch:i){
-//                for(char c:ch) System.out.print(c);
-//            }
-//        }
-//        System.out.println();
+        for(char[][] i:ans){
+            for(char[] ch:i){
+                for(char c:ch) System.out.print(c);
+            }
+            System.out.println();
+        }
 
-        long endTime=System.nanoTime();
-        System.out.println("时间耗费为："+(endTime-beginTime)/1000+" us\n");
+//        long endTime=System.nanoTime();
+//        System.out.println("时间耗费为："+(endTime-beginTime)/1000+" us\n");
         threadPool.shutdown();
     }
 }
