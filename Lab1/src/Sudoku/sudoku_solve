@@ -1,2 +1,2 @@
-# javac sudoku/BasicThread.java sudoku/DancingLink.java sudoku/Main.java -d sudoku
+javac sudoku/BasicThread.java sudoku/DancingLink.java sudoku/Main.java -d sudoku
 java -cp sudoku src.Sudoku.sudoku.Main
