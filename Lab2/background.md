@@ -1,319 +1,434 @@
-## 2. Background
+# Lab2: Your Own HTTP Server
 
-### 2.1 Hypertext Transport Protocol
+*Some materials are from Homework 2 of CS162 2019 at UC Berkeley.* *Thanks to CS162!* 
 
-The Hypertext Transport Protocol (HTTP) is the most commonly used application protocol on the Internet today. 
+Enter in the folder you have cloned from our lab git repo, and pull the latest commit - use `git pull`.
 
-Like many network protocols, HTTP uses a client-server model. An HTTP client opens a network connection to an HTTP server and sends an HTTP request message. Then, the server replies with an HTTP response message, which usually contains some resource (file, text, binary data) that was requested by the client. 
+You can find this lab2's instruction in `Lab2/README.md` 
 
-We briefly introduce the HTTP message format and structure in this section for your convenience. Detailed specification of HTTP/1.1 can be found in [RFC 2616 - Hypertext Transfer Protocol -- HTTP/1.1](https://tools.ietf.org/html/rfc2616).
+All materials of lab2 are in folder `Lab2/`.
 
-### 2.2 HTTP Messages
+# 1. Overview
 
-HTTP messages are simple, formatted blocks of data. 
+Implement an HTTP server based on HTTP/1.1 from scratch by your own, using network programming knowledges learned from our class. 
 
-All HTTP messages fall into two types: **request** messages and **response** messages. 
+Also, try to use high concurrency programming skills learned from the class to guarantee the web server's performance.
 
-* Request messages request an action from a web server. 
+**Our Goals:**
 
-* Response messages carry results of a request back to a client. 
+* Practice basic network programming skills, such as using socket API, parsing packets;
+* Get familiar with robust and high-performance concurrent programming.
 
-Both request and response messages have the same basic message structure.
+# 2. Backround
 
-#### 2.2.1 Message Format 
+**Please check [background.md](./background.md) first to learn some basics about `HTTP`, `HTTP messages` , `HTTP proxy`, `JSON` & `curl`.**
 
-HTTP request and response messages consist of 3 components: 
+# 3. Your Lab Task
 
-- a start line describing the message, 
-- a block of headers containing attributes, 
-- and an optional body containing data.
+## Implement your own HTTP Server
 
-Each component has the format as following
+In this Lab, we won't provide any basic code. You should implement a HTTP server based on HTTP/1.1, from scratch which satisfies the following requirements:
 
-##### 2.2.1.1 Start Line
+**HTTP Server Outline**
 
-All HTTP messages begin with a start line. The start line for a request message says *what to do*. The start line for a response message says *what happened*.
+From a network standpoint, your HTTP server should implement the following:
 
-Specifically, the start line is also called ***Request line*** in *Request messages* and ***Response line*** in *Response messages*.
+1. Create a listening socket and bind it to a port;
+1. Wait a client to connect to the port;
+1. Accept the client and obtain a new connection socket;
+1. Read in and parse the HTTP request;
+1. Start delivering services (*some are optional*): 
+   * Handle HTTP GET/POST requests and return responses. 
+   * Proxy the request to another HTTP server.
 
-* **Request line** 
-   * contains a method describing what operation the server should perform and a request URL describing the resource on which to perform the method. 
-   * also includes an HTTP version tells the server what dialect of HTTP the client is speaking. All of these fields are separated by whitespace.
-   * eg. `GET /index.html HTTP/1.1`
+The server will be in either non-proxy mode or proxy mode (we have introduced the proxy in background section `2.3`). It does not do both things at the same time.
 
-* **Response line** 
-  * contains the HTTP version that the response message is using, a numeric status code, and a textual reason phrase describing the status of the operation.
-  *  eg. `HTTP/1.1 200 OK`
+In order to better test and score, we have made **some functional requirements** for your submitted works.
 
-##### 2.2.1.2 Header
+**ATTENTION**: Lab 2 is a pre-lab of Lab 4. If you plan to complete Lab 4, please complete **the advanced version** of Lab 2. 
 
-Following the start line comes a list of zero, one, or many HTTP header fields. 
+### 3.1 Handle HTTP request & send HTTP response
 
-HTTP header fields add additional information to request and response messages. They are basically just lists of name/value pairs. 
+In this Lab, **you just need to implement the GET method and the POST method in your HTTP server**. 
 
-Each HTTP header has a simple syntax: a name, followed by a colon `:`, followed by optional whitespace, followed by the field value, followed by a `CRLF`.
+For any other methods, your server should send a response with 501 status code (see `2.2`).
+That is to say, if your HTTP server receive a HTTP request but the request method is neither GET nor POST, the HTTP server just need to return a 501 Not Implemented error message (a response message with Response line having status code to be 501, see `2.2`).
 
-HTTP headers are classified into: 
- * General headers
- * Request headers
- * Response headers
- * Entity headers 
- * Extension headers. 
+See examples in section [3.7](#37-access-your-http-server).
 
-Note that request-header fields are different from the response-header fields. We will not introduce those fields in details and you are not required to implement in this lab. 
+#### 3.1.1 Handle HTTP GET request
 
-You can find them in [RFC 2616 - Hypertext Transfer Protocol -- HTTP/1.1](https://tools.ietf.org/html/rfc2616).
+The HTTP server should be able to handle HTTP GET requests for specific resources, e.g., web service data & static files.
 
-Example of headers in a request:
+For a GET request, the server needs to check whether the path of request corresponds to a web service or a existed static file.
 
-```
-Host: 127.0.0.1:8888
-User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:74.0) Gecko/20100101 Firefox/74.0
-Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8
-Accept-Language: en-US,en;q=0.5
-Accept-Encoding: gzip, deflate
-Connection: keep-alive
-Upgrade-Insecure-Requests: 1
-Cache-Control: max-age=0
-								     // CRLF
-```
+What you need to do:
 
-Example of headers in a response:
+**basic version**:
 
-```
-Server: Guo's Web Server
-Content-length: 248
-Content-type: text/html
-							            // CRLF
-```
+* A search service: use a specific url to get some data from the server that does not come from a file stored on the file system.
+  * The url don't have query string, e.g. `http://localhost:8080/check`;
+  * Send response with plain text content.
 
-##### 2.2.1.3 Entity Body
+* Static files access: use a specific url to access a text file stored on the file system.
+  * Clients only request `*.html`;
+  * Clients may request a file in subdirectories, e.g. `http://localhost:8080/test/index.html`;
+  * Send response with the full content of html file.
 
-The third part of an HTTP message is the optional entity body. Entity bodies are the payload of HTTP messages. They are the things that HTTP was designed to transmit.
+* If the path is invalid or the static file does not exist
+  * Send response with the full content of `404 Not Found` page.
 
-HTTP messages can carry many kinds of digital data: images, video, HTML documents, software applications, credit card transactions, electronic mail, and so on.
+**advanced version**:
 
-Example of entity body:
+* A search service: use a specific url to get some data from the server that does not come from a file stored on the file system.
+  * The url may have query string, e.g. `http://localhost:8080/search?id=1&name=foo`;
+  * The query string contains some key-value pairs. Keys are `id` & `name`;
+  * If the query string is valid, send response with json type content.
+  * Or if invalid, send response with json type content, including error messages;
 
-```
-<html><head>
-<title>CS06142</title>
-</head><body>
-<h1>CS06142</h1>
-<p>Welcome to Cloud Computing Course.<br />
-</p>
-<hr>
-<address>Http Server at ip-127-0-0-1 Port 8888</address>
-</body></html>
-```
+* Static files access: use a specific url to access a text file stored on the file system.
+  * Clients may request `*.html`, `*.js`, `*.css`, `*.json` and other plain text files;
+  * Clients may request a file in subdirectories, e.g. `http://localhost:8080/test/index.html`;
+  * Send Response with the correct `Content-Type` & the full content of the file.
 
-#### 2.2.2 Structure of HTTP Request
+* If the path is invalid or the static file does not exist
+  * Send response with the full content of `404 Not Found` page.
 
-A HTTP request message contains:
+*You don't need to implement to transmit base64 encoded binary files, such as image files like `*.png`.* 
 
-* an HTTP request line:
-  * method,
-  * a query string,
-  * the HTTP protocol version,
-* zero or more HTTP header lines,
-* a blank line (i.e. a `CRLF` by itself),
-* a optional content that request need to carry.
+#### 3.1.2 Handle HTTP POST request
 
-Example of HTTP request message:
+The HTTP server should be able to handle HTTP POST requests.
 
-```
-GET /index.html HTTP/1.1   
-Host: 127.0.0.1:8888
-User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:74.0) Gecko/20100101 Firefox/74.0
-Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8
-Accept-Language: en-US,en;q=0.5
-Accept-Encoding: gzip, deflate
-Connection: keep-alive
-Upgrade-Insecure-Requests: 1
-Cache-Control: max-age=0
-								     // CRLF
-```
+For a POST request, the server needs to check whether the path of request corresponds to a web service.
 
-#### 2.2.3 Structure of HTTP Response
+> For special characters, like `%`, you may need google about **percent encoding**.
 
-A HTTP response message contains:
+What you need to do:
 
-* an HTTP response status line:
-  * the HTTP protocol version,
-  * the status code
-  * a description of the status code),
-* zero or more HTTP header lines,
-*  a blank line (i.e. a `CRLF` by itself) 
-*  the content requested by the HTTP request.
+**basic version**:
 
-Example of HTTP response message:
+* A upload service: use a specific url to upload some data to the server
+  * The content type is `application/x-www-form-urlencoded`;
+  * The payload contains key-value pairs, keys are `id` & `name`;
+  * If the payload is valid, send response with `200 OK`, `Content-Type: text/plain` & data;
+  * Or if the payload invalid, send response with send response with `404 Not Found`, `Content-Type: text/plain` & error messages;
 
-```
-HTTP/1.1 200 OK  					
-Server: Tiny Web Server
-Content-length: 248
-Content-type: text/html
-									// CRLF
-<html><head>
-<title>CS06142</title>
-</head><body>
-<h1>CS06142</h1>
-<p>Welcome to Cloud Computing Course.<br />
-</p>
-<hr>
-<address>Http Server at ip-127-0-0-1 Port 8888</address>
-</body></html>
-```
+* If the path is invalid
+  * Send response with the full content of `404 Not Found` page.
 
-The `Host` request header specifies the host and port number of the server to which the request is being sent. If no port is included, the default port for the service requested is implied (e.g., 443 for an HTTPS URL, and 80 for an HTTP URL).
+**advanced version**:
 
-The `Content-Length` header indicates the size of the message body, in bytes, sent to the recipient.
+* A upload service: use a specific url to upload some data from the server that does not come from a file stored on the file system.
+  * The content type is `application/x-www-form-urlencoded`, `application/json`;
+  * The payload contains key-value pairs, keys are `id` & `name`;
+  * If the payload is valid, send response with `200 OK`, `Content-Type: application/json` & data;
+  * Or if the payload invalid, send response with send response with `404 Not Found`, `Content-Type: application/json` & error messages;
 
-The `Content-Type` representation header is used to indicate the original media type of the resource.
+* If the path is invalid
+  * Send response with the full content of `404 Not Found` page.
 
-Here are some examples:
+If you are not familiered with `application/x-www-form-urlencoded`, check [MDN docs](https://developer.mozilla.org/en-US/docs/Learn/Forms/Sending_and_retrieving_form_data).
 
-| file extension | MIME Type |
+#### 3.1.3 Other request
+
+Just return 501 Not Implemented page for other request method (e.g. DELETE, PUT, etc.).
+
+### 3.2 Implement a proxy server (optional for advanced version)
+
+Enable your server to proxy HTTP requests to another HTTP server and forward the responses to the clients.
+
+1. You should use the value of the `--proxy` command line argument, which contains the address and port number of the upstream HTTP server.
+   
+2. Your proxy server should wait for new data on both sockets (the HTTP client file descriptor, and the upstream HTTP server file descriptor). When data arrives, you should immediately read it to a buffer and then write it to the other socket. You are essentially maintaining 2-way communication between the HTTP client and the upstream HTTP server. Note that your proxy must support multiple requests/responses.
+
+3. If either of the sockets closes, communication cannot continue, so you should close the other socket and exit the child process.
+
+Hints: 1) This is more tricky than writing to a file or reading from stdin, since you do not know which side of the 2-way stream will write data first, or whether they will write more data after receiving a response. 2) You should again use threads for this task. For example, consider using two threads to facilitate the two-way communication, one from A to B and the other from B to A.
+
+> Most websites now use HTTPS and will check your HTTP header lines, your proxy server may not be suitable for any web server.
+> 
+> It is not our task to implement protocols other than HTTP. 
+> 
+> They often involve encryption algorithms and are difficult to implement directly using socket api. 
+> 
+> However, if you are interested in protocols such as HTTPS, you can try to use other libraries, e.g. openssl. 
+
+### 3.3 Use multi-thread to increase concurrency
+
+Your HTTP server should use multiple threads to handle as many concurrent clients' requests as possible. You have at least the following three options to architect your multi-thread server:
+
+- **On-demand threads**.  You can can create a new thread whenever a new client comes in, and use that thread to handle all that clients' task, including parsing the HTTP request, fetching page files, and sending response. The thread can be destroyed after that client finishes, e.g, detect through TCP `recv()`.  However,it may not be easy to detect client finish in the HTTP layer.
+
+- **A pool of always-on threads**. You can use a fixed-sized thread pool in your HTTP server program for handling multiple client requests concurrently. If there are no tasks, those threads are in a waiting state. If a new client comes in, assign a thread to handle the client's request and send response to it. If the assigned thread is busy, you can use a work queue to buffer the request, and let the thread process it later.  
+
+- **Combined**. Combine above two styles together. For example, you can use thread pool to receive request and send response, and use on-demand threads to fetch large page files.  
+
+Feel free to choose any one from the above three, or use other multi-thread architecture that you think is cool.
+
+### 3.4 Support HTTP pipelining
+
+In the basic version, you have **only one request per TCP connection going on at the same time**. The client waits for response, and when it gets response, perhaps reuses the TCP connection for a new request (or use a new TCP connection). This is also what normal HTTP server supports.
+
+In the advanced version, **multiple http requests can be fired concurrently on one TCP connection**. This is also called HTTP pipelining which is supported by many real browsers and servers (such as Chrome). Note that HTTP requests that come from the same TCP connection should be responded in the same order. So take care the order problem when using complex multi-thread styles. 
+
+### 3.5 Specify arguments
+
+Your program should enable long options to accept arguments and specify those arguments during start.
+
+They are:
+
+| arguments | descriptions |
 | --- | --- |
-| *.html | text/html |
-| *.js | text/javascript |
-| *.css| text/css |
-| *.txt | text/plain |
-| *.json | application/json |
-| *.png | image/png |
-| *.jpg | image/jpg |
+| -i, --ip \<IP\> | Specify the server IP address. |
+| -p, --port \<PORT\> | Selects which port the HTTP server listens on for incoming connections. |
+| --proxy \<PROXY\> | Selects an "upstream" HTTP server to proxy. |
+| -t, --threads \<THREADS\> | Number of threads if you use multi-thread. |
 
-### 2.3 HTTP Proxy
+The `--proxy` can have a schema before `://` and a port number after a colon (e.g. `http://www.example.com:80`). If a port number is not specified, port 80 is the default for HTTP.
 
-HTTP proxy servers are intermediaries. Proxies sit between clients and servers and act as "middlemen", shuffling HTTP messages back and forth between the parties.
+If you have no idea about *long options*, you can read [this](https://www.gnu.org/software/libc/manual/html_node/Argument-Syntax.html#Argument-Syntax). And you may need to use some functions like `getopt_long()`, `getopt_long_only()`, `getopt()` and so on. Check those function's usage with the `man` command.
 
-HTTP proxy servers are middlemen that fulfill transactions on the client's behalf. Without a HTTP proxy, HTTP clients talk directly to HTTP servers. With a HTTP proxy, the client instead talks to the proxy, which itself communicates with the server on the client's behalf.
+### 3.6 Run your HTTP Server
 
-HTTP proxy servers are both web servers and web clients. Because HTTP clients send request messages to proxies, the proxy server must properly handle the requests and the connections and return responses, just like a web server. At the same time, the proxy itself sends requests to servers, so it must also behave like a correct HTTP client, sending requests and receiving responses.
+**For advanced version**:
 
-The working pattern of HTTP proxy is shown in the following figure:
+Your program should be able to start at terminal. If your program is called *http-server*, just typing:
 
-```
-                               +-----------+               +-----------+
-                               |           |               |           |
-   +----------+    Request     |           |   Request     |           |
-   |          |+--------------->           |+-------------->           |
-   |  Client  |                |   Proxy   |               |   Server  |
-   |          <---------------+|           <--------------+|           |          
-   +----------+	   Response    |           |   Response    |           |          
-                               |           |               |           |
-                               +-----------+               +-----------+
-```
+in the non-proxy mode: 
 
-## 2.4 JSON
+`./http-server --ip 127.0.0.1 --port 8888 --threads 8` 
 
-JSON (JavaScript Object Notation) is a lightweight data-interchange format. It is easy for humans to read and write. It is easy for machines to parse and generate. It is based on a subset of the JavaScript Programming Language Standard ECMA-262 3rd Edition - December 1999. JSON is a text format that is completely language independent but uses conventions that are familiar to programmers of the C-family of languages, including C, C++, C#, Java, JavaScript, Perl, Python, and many others. These properties make JSON an ideal data-interchange language.
+It means that your HTTP server's IP address is 127.0.0.1 and service port is 8888. The --number-thread indicates that there are 8 threads in the thread pool for handling multiple client request concurrently.
 
-JSON is built on two structures:
+in the proxy mode:
 
-* A collection of name/value pairs. In various languages, this is realized as an object, record, struct, dictionary, hash table, keyed list, or associative array.
+`./http-server --ip 127.0.0.1 --port 8888 --threads 8 --proxy http://www.example.com:80`
 
-* An ordered list of values. In most languages, this is realized as an array, vector, list, or sequence.
+It means that this is an HTTP proxy server. This proxy's IP address is 127.0.0.1 and service port is 8888. And the proxy has a thread pool with 8 threads. The --proxy indicates that the "upstream" HTTP server is `http://www.example.com:80`. So, if you send a request message to this proxy (i.e. `127.0.0.1:8888`), it will forward this request message to the "upstream" HTTP server (i.e. `http://www.example.com:80`) and forward the response message to the client.
 
-These are universal data structures. Virtually all modern programming languages support them in one form or another. It makes sense that a data format that is interchangeable with programming languages also be based on these structures.
+> If you want to access this server from other host, maybe you should open the firewall corresponding to the port and bind the ip to 0.0.0.0.
 
-In JSON, they take on these forms:
+When you run the command above, your HTTP server should run correctly.
 
-* An object is an unordered set of name/value pairs. An object begins with `{` and ends with `}`. Each name is followed by `:`and the name/value pairs are separated by `,`.
+### 3.7 Access Your HTTP Server
 
-* An array is an ordered collection of values. An array begins with `[` and ends with `]`. Values are separated by `,`.
+We assume that the ip the server bound is `127.0.0.1` and the port is `8080`. If the proxy feature is used, the remote server is `www.example.com`.
 
-* A value can be a string in double quotes, or a number, or true or false or null, or an object or an array. These structures can be nested.
+For more efficient testing and scoring, we need you to implement some of the interfaces described below, and make sure that the content of the response is consistent with our expectations.
 
-* A string is a sequence of zero or more Unicode characters, wrapped in double quotes, using backslash escapes. A character is represented as a single character string. A string is very much like a C or Java string.
+**That's why we provide some standard static files. You can check those files in `./static/` & `./data/`.**
 
-* A number is very much like a C or Java number, except that the octal and hexadecimal formats are not used.
+Please make sure your server supports accessing them, and **do not modify their content or relative paths**.
 
-* Whitespace can be inserted between any pair of tokens. Excepting a few encoding details, that completely describes the language.
+#### 3.7.1 Using GET method
 
-For example:
+**1) access static files**
 
-```json
-{
-    "status": {
-        "code": 200,
-        "text": "OK"
-    },
-    "data" : [
-        {
-            "id": "S1",
-            "name": "Foo"
-        },
-        "Bar\r\n",
-        5.0,
-        true,
-        null
-    ]
-}
-```
+For **basic** version:
 
-## 2.5 CURL
+| path | files in local fs | status code | content type |
+| --- | --- | --- | --- |
+| /, /index.html | /`{static dir}`/index.html | 200 | text/html |
+| /404.html | /`{static dir}`/404.html | 404 | text/html |
+| /501.html | /`{static dir}`/501.html | 501 | text/html |
+| any other error paths | /`{static dir}`/404.html | 404 |text/html |
 
-`curl` is a tool to transfer data from or to a server, using one of the supported protocols (DICT, FILE, FTP, FTPS, GOPHER, HTTP, HTTPS, IMAP, IMAPS, LDAP, LDAPS, MQTT, POP3, POP3S, RTMP, RTMPS, RTSP, SCP, SFTP, SMB, SMBS, SMTP, SMTPS, TELNET and TFTP). The command is designed to work without user interaction.
-
-`curl` offers a busload of useful tricks like proxy support, user authentication, FTP upload, HTTP post, SSL connections, cookies, file transfer resume, Metalink, and more. As you will see below, the number of features will make your head spin!
-
-`curl` is powered by libcurl for all transfer-related features. See libcurl(3) for details.
-
-### 2.5.1 source code
-
-You can check out the latest [source code](https://github.com/curl/curl) from GitHub.
-
-### 2.5.2 install
-
-On many operating systems, curl is already installed by default. If not, you can use the system's package management tool to install it. E.g., `sudo apt install curl` for Ubuntu.
-
-### 2.5.3 tutorials
-
-For more tutorials, please check [curl tutorial](https://curl.se/docs/manual.html) or use `man curl` after installing.
-
-Here we give some examples that you might need in your lab.
-
-#### 2.5.3.1 GET
-
-##### access static resouces
+E.g.:
 
 ```shell
-curl -i -X GET http://localhost:8080/index.html
+user@linux:~/http-server$ curl -i -X GET http://localhost:8080/index.html
+HTTP/1.1 200 OK
+Content-Type: text/html
+Content-Length: 210
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="/styles.css"/>
+    <title>Http Server</title>
+</head>
+<body>
+    <h1>index.html</h1>
+</body>
+</html> 
 ```
 
-##### access a web service
+For **advanced** version:
+
+| path | files in local fs | status code | content type |
+| --- | --- | --- | --- |
+| /, /index.html | /`{static dir}`/index.html | 200 | text/html |
+| /404.html | /`{static dir}`/404.html | 404 | text/html |
+| /501.html | /`{static dir}`/501.html | 501 | text/html |
+| [/\*]/\*.html | /`{static dir}`[/\*]/\*.html | 200 | text/html |
+| [/\*]/\*.js | /`{static dir}`[/\*]/\*.js | 200 | text/javascript |
+| [/\*]/\*.css | /`{static dir}`[/\*]/\*.css | 200 | text/css |
+| [/\*]/\*.json | /`{static dir}`[/\*]/\*.json | 200 | application/json |
+| any other error paths | /`{static dir}`/404.html | 404 | text/html |
+
+```
+user@linux:~/http-server$ curl -i -X GET http://localhost:8080/data.json
+HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 101
+
+[{"id":"1","name":"Foo"},{"id":"2","name":"Bar"},{"id":"3","name":"Foo Bar"},{"id":"4","name":"Foo"}]
+```
+**2) access web services for getting data**
+
+For **basic** version:
+
+| path | get data | status code | content type |
+| --- | --- | --- | --- |
+| /api/check | strings in `data.txt` | 200 | text/plain |
+| any other error paths | /{static files}/404.html | 404 | text/html |
+
+E.g.:
 
 ```shell
-curl -i -X GET http://localhost:8080/api/search
+user@linux:~/http-server$ curl -i -X GET http://localhost:8080/api/check
+HTTP/1.1 200 OK
+Content-Type: text/plain
+Content-Length: 13
+
+id=1&name=Foo
 ```
 
-###### with query string
+For **advanced** version:
+
+| path | get data | status code | content type |
+| --- | --- | --- | --- |
+| /api/list | all objects in `data.json` | 200 | application/json |
+| /api/search?[id=`value1`&name=`value2`] | all objects that match <br /> `*.id == value1 && *.name == value2` <br /> in `/data/data.json` | 200 | application/json |
+| /api/search?[id=`value1`&name=`value2`] | if no object matches, return all objects <br /> in `/data/not_found.json` | 404 |application/json |
+| any other error paths | /{static files}/404.html | 404 | text/html |
+
+> If you do not want to parse json file, you could store the data in memory instead of reading file every time.
+
+E.g.:
 
 ```shell
-curl -i -G -d 'id=1&name=Foo' -X GET http://localhost:8080/api/search
+user@linux:~/http-server$ curl -i -G -d 'id=1&name=Foo' \
+> -X GET http://localhost:8080/api/search
+HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 25
+
+[{"id":"1","name":"Foo"}] 
 ```
 
-##### 2.5.3.2 POST
+#### 3.7.2 Using POST method
 
-##### send data like html <form />
+**access web services for uploading data**
+
+all data you need to upload are two key/value pairs: `id: {value1}` & `name: {value2}`.
+
+Your server should check the data. In default case, the server should echo the data from the client. If the data format is error, send content error messge. 
+
+For **basic** version:
+
+The client should send requests with `Content-Type: application/x-www-form-urlencoded`.
+
+After handling, send response:
+
+| path | content | status code | content type |
+| --- | --- | --- | --- |
+| /api/echo | echo the data received | 200 | application/x-www-form-urlencoded |
+| /api/echo | if the data format is error, send strings <br /> in `/data/error.txt` |  404 | text/plain |
+| any other error paths | /{static files}/404.html | 404 | text/html |
+
+E.g.:
 
 ```shell
-curl -i -d 'id=1&name=Foo'
-    -H 'Content-Type: application/x-www-form-urlencoded'
-    -X POST http://localhost:8080/api/upload
+user@linux:~/http-server$ curl -i -d 'id=1&name=Foo' \
+> -H 'Content-Type: application/x-www-form-urlencoded' \
+> -X POST http://localhost:8080/api/upload
+HTTP/1.1 200 OK
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 13
+
+id=1&name=Foo
 ```
 
-##### send data use form-data
+For **advanced** version:
+
+The client should send requests with `Content-Type`:
+  * `application/x-www-form-urlencoded`,
+  * `application/json`.
+
+After handling, send response:
+
+| path | content | status code | content type |
+| --- | --- | --- | --- |
+| /api/upload | echo the data received | 200 | application/json |
+| /api/upload | if the data format is error, send strings <br /> in `/data/error.json` | 404 | application/json |
+| any other error paths | /{static files}/404.html | 404 | text/html |
+
+E.g.:
 
 ```shell
-curl -i -F "id=1" -F "name=Foo"
-    -X POST http://localhost:8080/api/upload
-```
-##### send data use json
+user@linux:~/http-server$ curl -i -d '{"id":"1","name":"Foo"}' \
+> -H 'Content-Type: application/json' \
+> -X POST http://localhost:8080/api/upload
+HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 23
 
-```shell
-curl -i -d '{"id":"1","name":"Foo"}'
-    -H 'Content-Type: application/json'
-    -X POST http://localhost:8080/api/upload
+{"id":"1","name":"Foo"}
 ```
+
+#### 3.7.3 Other method
+
+The HTTP server will not handle HTTP requests except GET requests and POST requests.
+
+If you send a HTTP request with `DELETE` (or `PUT`, `HEAD`, etc.)  to delete the specified resource, your server should send `/{static dir}/501.html`:
+
+### 3.8 Implementation requirements
+
+**Version**
+
+* **Basic version**
+
+    Complete all the tasks of **the basic version** described in section `3.1.1~3.1.7` except `3.1.3` & `3.1.4`. 
+
+* **Advanced version**
+
+    Complete all the tasks of **the advanced version** described in section `3.1.1~3.1.7` **including `3.1.3` & `3.1.4`**. 
+
+**Do a performce test**
+
+Please test your code first, and commit a test report along with your lab code into your group’s course github repo.
+
+The test report should describe the performance result under various testing conditions. Specifically, in your test report, you should at least contain the following two things:
+
+1. Test how many HTTP request your server can process per second, when running on various server machine environments. For example, change the number of server CPU cores, enable/disable hyper-threading, etc. 
+   
+2. Test how many HTTP request your server can process per second, by varying the number of concurrent clients that send request to your server simultaneously. Do change the client's workload. For example, test when a client use new TCP connection for a new request, or when a client reuses old TCP connection for new requests. Moreover, if you implement the advanced version, try to change the number of out-bounding requests on the same client's TCP connection. You can write a simple client that send HTTP Get by your own (can run multiple client programs on the same machine to emulate multiple clients), or use some existing HTTP client testing tools such as [ab - Apache HTTP server benchmarking tool](http://httpd.apache.org/docs/current/programs/ab.html). 
+
+**[NOTE]**: Be careful that clients may be the performance bottleneck. So you'd better use multiple machines when testing the performance. For example, you can run multiple client processes on three machines (of three group members), and run the server process on another machine (of the other group member). Moreover, the network can be the bottleneck too. You can estimate the performance limit according to the physical bandwidth of your network environment, and see if your implementation can reach the performance limit. 
+
+# 4. Tester & judger
+
+We  provide some tools for testing & judging. 
+
+You can check the repos of them: [tester](https://github.com/LabCloudComputing/http-server-tester) & [judger - not finished yet](https://www.bilibili.com/video/BV1GJ411x7h7).
+
+Of course you can also use your own browser and other web tools like curl.
+
+# 5. Lab submission
+
+Please put all your code in folder `Lab2` and write a `Makefile` so that we **can compile your code in one single command** `make`. The compiled runnable executable binary should be named `http-server` and located in folder `Lab2`. Please carefully following above rules so that TAs can automatically test your code!!!
+
+Please submit your lab program and performance test report following the guidance in the [Overall Lab Instructions](../README.md) (`../README.md`)
+
+# 6. Grading standards
+
+* You can get 28 points if you can: 
+   * finish all the requirements of the basic version
+
+* You can get 30 points (full score) if you can:
+  * finish all the requirements of the advanced version
+
+If you missed some parts, you will get part of the points depending how much you finished.
