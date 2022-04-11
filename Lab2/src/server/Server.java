@@ -12,7 +12,7 @@ public class Server {
         this.port = port;
         try {
             listener = new ServerSocket(port);
-            listener.setSoTimeout(10000);
+//            listener.setSoTimeout(10000);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -23,11 +23,10 @@ public class Server {
             try{
                 System.out.println("port ["+port+"] is waiting for connection...");
                 Socket socket=listener.accept();
-                System.out.println(socket.getRemoteSocketAddress());
-                System.out.println(socket.getInetAddress());
-                System.out.println("remote port is: "+socket.getPort());
-                System.out.println("local port is: "+socket.getLocalPort());
+                System.out.println("remote address is: "+socket.getRemoteSocketAddress());
+                System.out.println("local address is: "+socket.getLocalAddress()+":"+socket.getLocalPort());
                 socket.close();
+                System.out.println("connection has been closed.\n");
             }catch (IOException e){
                 e.printStackTrace();
             }
