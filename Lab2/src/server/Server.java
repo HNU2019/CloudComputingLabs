@@ -1,5 +1,6 @@
 package src.server;
 
+import java.io.DataInputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
@@ -12,9 +13,9 @@ public class Server {
     public Server(String serverIp, int port) {
         this.port = port;
         try {
-            listener = new ServerSocket(port,50,InetAddress.getByName(serverIp));
+            listener = new ServerSocket(port, 50, InetAddress.getByName(serverIp));
 //            listener = new ServerSocket(port);
-            System.out.println(listener.getLocalSocketAddress());
+            System.out.println("Local socket address is "+listener.getLocalSocketAddress());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -24,10 +25,18 @@ public class Server {
         while (true) {
             try {
                 System.out.println("port [" + port + "] is waiting for connection...");
-                Socket socket = listener.accept();
-                System.out.println("remote address is: " + socket.getRemoteSocketAddress());
-                System.out.println("local address is: " + socket.getLocalAddress() + ":" + socket.getLocalPort());
-                socket.close();
+                Socket server = listener.accept();
+                System.out.println("remote address is: " + server.getRemoteSocketAddress());
+                System.out.println("local address is: " + server.getLocalAddress() + ":" + server.getLocalPort());
+                DataInputStream din = new DataInputStream(server.getInputStream());
+                String str = din.readUTF();
+
+                while (!str.equals("")) {
+                    System.out.println(str);
+                    str = din.readUTF();
+                }
+
+                server.close();
                 System.out.println("connection has been closed.\n");
             } catch (IOException e) {
                 e.printStackTrace();
