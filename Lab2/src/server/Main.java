@@ -32,6 +32,10 @@ public class Main {
                     System.out.println("please enter the correct number of threads");
                     System.exit(-1);
                 }
+            }else if(args[i].equals("--proxy")){
+                i--;
+                System.out.println("Sorry, we haven't accomplished the proxy server");
+                System.exit(-1);
             }
         }
         //用来检查输入参数
