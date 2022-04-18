@@ -41,6 +41,8 @@ public class DanceingLinks {
         Column columns_[] = new Column[400];
         Vector<Node> stack_ = new Vector<Node>();
         Node nodes_[] = new Node[kMaxNodes];
+
+
         int cur_node_;
 
         public Column new_column(int n) {
@@ -62,6 +64,7 @@ public class DanceingLinks {
             int n = 0;
             Column c = (Column) nodes_[cur_node_++];
             //memset(c, 0, sizeof(Column));
+
             c.left = c;
             c.right = c;
             c.up = c;
@@ -177,7 +180,7 @@ public class DanceingLinks {
             }
         }
 
-        Column get_min_column() {
+        public Column get_min_column() {
             Column c = (Column) root_.right;
             int min_size = c.size;
             if (min_size > 1) {
@@ -194,7 +197,7 @@ public class DanceingLinks {
             return c;
         }
 
-        void cover(Column c) {
+        public void cover(Column c) {
             c.right.left = c.left;
             c.left.right = c.right;
             for (Node row = c.down; row != c; row = row.down) {
@@ -218,7 +221,7 @@ public class DanceingLinks {
             c.left.right = c;
         }
 
-        boolean solve() {
+        public boolean solve() {
             if (root_.left == root_) {
                 for (int i = 0; i < stack_.size(); ++i) {
                     Node n = stack_.get(i);
