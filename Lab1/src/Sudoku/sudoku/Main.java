@@ -1,18 +1,20 @@
-package mySrc.sudoku;
+package src.Sudoku.sudoku;
 
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.concurrent.*;
 
+@SuppressWarnings("unchecked")
 public class Main {
-    public static void test(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException {
         Scanner sc = new Scanner(System.in);
 
         String path=System.getProperty("user.dir");
-        path+="/Lab1/src/Sudoku/";
+//        path+="/Lab1/src/Sudoku";
 
-        path+=sc.next();
+
+        path=path+"/"+sc.next();
 //        path+="test1";
 //        path+="test1000";
 //        path+="test10000";
