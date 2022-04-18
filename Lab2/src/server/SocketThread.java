@@ -7,9 +7,6 @@ import java.net.Socket;
 
 public class SocketThread implements Runnable {
     private Socket server;
-    private String method;
-    private String url;
-    private String httpVersion;
 
     public SocketThread(Socket socket) {
         server = socket;
@@ -22,14 +19,13 @@ public class SocketThread implements Runnable {
         try {
             BufferedReader reader = new BufferedReader(new InputStreamReader(server.getInputStream()));
 
-            String str = reader.readLine();  //第一行是请求行
+            String str = reader.readLine();  //第一行是请求行，格式是"方法 URL http版本"
             String[] request = str.split(" ", 3);
-            method = request[0];
-            url = request[1];
-            httpVersion = request[2];
+            String method = request[0];
 
             if (method.equals("GET")) {
-
+                ResponseOfGET doget = new ResponseOfGET(server, request[1]); // 将url传入
+                doget.response();
             } else if (method.equals("POST")) {
 
             } else {
