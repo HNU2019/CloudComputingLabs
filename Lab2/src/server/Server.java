@@ -4,10 +4,14 @@ import java.io.*;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.regex.Pattern;
 
 public class Server {
     private final int port;
     private ServerSocket listener;
+    protected final static String filePath = "/[^/\\:\\*\\?\"<>]*\\.[^/\\:\\*\\?\"<>]+"; //文件名的正则表达式
+    protected final static String search = "/api/search\\?(id=(\\d+))?&?(name=(.+))?";  //search的正则表达式
+    protected static Pattern searchRegex;
 
     public Server(String serverIp, int port) {
         this.port = port;
@@ -18,6 +22,7 @@ public class Server {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        searchRegex = Pattern.compile(search);
     }
 
     public void Start() {

@@ -3,10 +3,11 @@ package src.server;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.Socket;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static src.server.Server.*;
 
 public class ResponseOfGET {
     private Socket server;
@@ -68,6 +69,9 @@ public class ResponseOfGET {
      * url不正确, 发送404.html
      */
     private void sendNotFound() {
+        StringBuilder response = new StringBuilder();
+        response.append(httpVersion);  //http版本
+        response.append(" 404 Not Found");
 
     }
 
@@ -81,8 +85,8 @@ public class ResponseOfGET {
                 head = reader.readLine();
             }
             // 开始处理
-            String filePath = "/[^/\\:\\*\\?\"<>]*\\.[^/\\:\\*\\?\"<>]+";  //文件名的正则表达式
-            String search = "/api/search\\?(id=(\\d+))?&?(name=(.+))?";
+              //文件名的正则表达式
+
 
             if (url.charAt(url.length() - 1) == '/') { //请求的是目录
                 sendNotFound();
@@ -93,8 +97,8 @@ public class ResponseOfGET {
             } else if (Pattern.matches(filePath, url)) {   //文件
                 System.out.println(url);
             } else if (Pattern.matches(search, url)) {  // search
-                Pattern regex = Pattern.compile(search);
-                Matcher m = regex.matcher(url);
+
+                Matcher m = searchRegex.matcher(url);
                 if (m.find()) {
                     String id=m.group(2);    //为空则为null
                     String name=m.group(4);  //为空则为null
