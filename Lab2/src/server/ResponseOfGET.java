@@ -146,7 +146,7 @@ public class ResponseOfGET {
             response.append(" 404 Not Found\r\n");
             try {
                 writer.write(response.toString());
-                writer.write(String.format("Content-Type: text/html\r\nContent-length: %d\r\n\r\n", _404.length));
+                writer.write(String.format("Content-Type: text/html\r\nContent-Length: %d\r\n\r\n", _404.length));
                 writer.write(new String(_404, 0, _404.length));   //读取_404数组并发送
                 writer.flush();  //最后刷新缓冲区
             } catch (IOException e) {
@@ -156,7 +156,7 @@ public class ResponseOfGET {
             response.append(" 200 OK\r\n");
             try{
                 writer.write(response.toString());
-                writer.write(String.format("Content-Type: application/json\r\nContent-length: %d\r\n\r\n", ans.length()));
+                writer.write(String.format("Content-Type: application/json\r\nContent-Length: %d\r\n\r\n", ans.length()));
                 writer.write(ans.toString());
                 writer.flush();
             } catch(IOException e){
@@ -175,7 +175,7 @@ public class ResponseOfGET {
         try {
             writer.write(response.toString());  //输出响应行
             int fileLength = _404.length;
-            writer.write(String.format("Content-Type: text/html\r\nContent-length: %d\r\n\r\n", fileLength));
+            writer.write(String.format("Content-Type: text/html\r\nContent-Length: %d\r\n\r\n", fileLength));
             writer.write(new String(_404, 0, _404.length));   //读取_404数组并发送
             writer.flush();  //最后刷新缓冲区
         } catch (IOException e) {

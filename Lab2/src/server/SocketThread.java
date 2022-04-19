@@ -3,6 +3,8 @@ package src.server;
 import java.io.*;
 import java.net.Socket;
 
+import static src.server.Server._501;
+
 public class SocketThread implements Runnable {
     private Socket server;
     private BufferedReader reader;
@@ -61,8 +63,12 @@ public class SocketThread implements Runnable {
             } else if (method.equals("POST")) {
                 ResponseOfPOST doPost = new ResponseOfPOST(request[1], request[2], reader, writer);
                 doPost.response();
-            } else {
-
+            } else {  // 其他方法返回501
+                StringBuilder response=new StringBuilder(request[2]+" 501 Not Implemented\r\n");
+                response.append(String.format("Content-Type: text/html\r\nContent-Length: %d\r\n\r\n",_501.length));
+                writer.write(response.toString());
+                writer.write(new String(_501));
+                writer.flush();
             }
 
             server.close();
