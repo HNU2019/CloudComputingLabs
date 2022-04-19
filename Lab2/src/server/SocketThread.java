@@ -18,7 +18,8 @@ public class SocketThread implements Runnable {
             BufferedReader reader = new BufferedReader(new InputStreamReader(server.getInputStream()));
             BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(server.getOutputStream()));
 
-            String str = reader.readLine();  //第一行是请求行，格式是"method URL http版本"
+            //第一行是请求行，格式是"method URL http版本"
+            String str = reader.readLine();
             System.out.println("/***** request *****/\n" + str);
             String[] request = str.split("[ ]+", 3);
 //            for(String s:request) System.out.printf("%s ",s);
@@ -26,10 +27,12 @@ public class SocketThread implements Runnable {
             String method = request[0];
 
             if (method.equals("GET")) {
-                ResponseOfGET doGet = new ResponseOfGET(server, request[1], request[2], reader, writer); // 不传入reader会引发阻塞
+                // 不传入reader会引发阻塞
+                ResponseOfGET doGet = new ResponseOfGET(server, request[1], request[2], reader, writer);
                 doGet.response();
             } else if (method.equals("POST")) {
-
+                ResponseOfPOST doPost = new ResponseOfPOST(server, request[1], request[2], reader, writer);
+                doPost.response();
             } else {
 
             }
