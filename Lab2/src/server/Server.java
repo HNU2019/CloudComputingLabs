@@ -3,6 +3,9 @@ package src.server;
 import java.io.*;
 import java.net.InetAddress;
 import java.net.ServerSocket;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 public class Server {
@@ -99,13 +102,18 @@ public class Server {
     }
 
     public void Start() {
+        // 创建线程池
+        int coresNum=Runtime.getRuntime().availableProcessors(); //获取cpu核心数
+        LinkedBlockingQueue<Runnable> workQueue=new LinkedBlockingQueue<>(50);
+        ThreadPoolExecutor pool=new ThreadPoolExecutor(coresNum*2-1,coresNum*10-1,
+                10L, TimeUnit.MILLISECONDS,workQueue);
+
         while (true) {
             try {
                 System.out.println("port [" + port + "] is waiting for connection...");
                 SocketThread connction = new SocketThread(listener.accept());
                 // 已连接到客户端
-                connction.run();
-
+                pool.submit(connction);
             } catch (IOException e) {
                 e.printStackTrace();
             }

@@ -41,9 +41,10 @@ public class Main {
             }
         }
         //用来检查输入参数
-//        System.out.println(serverIp);
-//        System.out.println(port);
-//        System.out.println(threadNum);
+        System.out.println("/*****Server start*****/");
+        System.out.println("ip: "+serverIp);
+        System.out.println("port: "+port);
+        System.out.println("thread number: "+threadNum);
 
         // 创建serverThread 实例
         Server server = new Server(serverIp,port);
