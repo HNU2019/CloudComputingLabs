@@ -1,23 +1,20 @@
 package src.server;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.IOException;
+import java.io.*;
 import java.net.Socket;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static src.server.Server.*;
+import static src.server.SocketThread.sendFileInBody;
 
 public class ResponseOfGET {
-    private Socket server;
     private String url;
     private String httpVersion;
     private BufferedReader reader;
     private BufferedWriter writer;
 
-    public ResponseOfGET(Socket socket, String url, String version, BufferedReader bf, BufferedWriter bw) {
-        server = socket;
+    public ResponseOfGET(String url, String version, BufferedReader bf, BufferedWriter bw) {
         this.url = url;
         httpVersion = version;
         reader = bf;
@@ -71,7 +68,16 @@ public class ResponseOfGET {
     private void sendNotFound() {
         StringBuilder response = new StringBuilder();
         response.append(httpVersion);  //http版本
-        response.append(" 404 Not Found");
+        response.append(" 404 Not Found\r\n");
+        try {
+            writer.write(response.toString());  //输出响应行
+            int fileLength = _404.length;
+            writer.write(String.format("Content-Type: text/html\r\nContent-length: %d\r\n\r\n", fileLength));
+            writer.write(new String(_404,0,_404.length));   //读取_404数组并发送
+            writer.flush();  //最后刷新缓冲区
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
     }
 
@@ -85,7 +91,7 @@ public class ResponseOfGET {
                 head = reader.readLine();
             }
             // 开始处理
-              //文件名的正则表达式
+            //文件名的正则表达式
 
 
             if (url.charAt(url.length() - 1) == '/') { //请求的是目录
@@ -100,8 +106,8 @@ public class ResponseOfGET {
 
                 Matcher m = searchRegex.matcher(url);
                 if (m.find()) {
-                    String id=m.group(2);    //为空则为null
-                    String name=m.group(4);  //为空则为null
+                    String id = m.group(2);    //为空则为null
+                    String name = m.group(4);  //为空则为null
 //                    System.out.println("id = " + id);
 //                    System.out.println("name = " + name);
                 }
