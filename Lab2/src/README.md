@@ -14,8 +14,8 @@
 ### GET
 #### 请求中url的几种可能
 1. 文件路径：如/index.html, /test/test.html，返回文件内容;
-2. /api/check：返回`/data/data.txt`中的文件内容
-3. /api/list：返回`/data/data.json`中的文件内容
+2. **/api/check**：返回`/data/data.txt`中的文件内容
+3. **/api/list**：返回`/data/data.json`中的文件内容
 4. /api/search?id=`value1`&name=`value2`：返回`/data/data.json`中匹配的所有条目，如果没有匹配的就返回`/data/not_found.json`中的所有条目
 5. 其他情况，一律返回`/static/404.html`中的内容
 
