@@ -58,10 +58,9 @@ public class SocketThread implements Runnable {
             String method = request[0];
 
             if (method.equals("GET")) {
-                ResponseOfGET doGet = new ResponseOfGET(server, request[1], request[2], reader, writer); // 不传入reader会引发阻塞
-                doGet.response();
+
             } else if (method.equals("POST")) {
-                ResponseOfPOST doPost = new ResponseOfPOST(server, request[1], request[2], reader, writer);
+                ResponseOfPOST doPost = new ResponseOfPOST(request[1], request[2], reader, writer);
                 doPost.response();
             } else {
 

@@ -20,7 +20,7 @@ public class Server {
      * 当类型为application/x-www-form-urlencoded时的body中的内容正则表达式
      */
     protected final  static  String body_match_form = "(id=(\\d+))?&?(name=(.+))?";
-    protected final  static  String body_match_json = "\'{\"id\":\"(\\d+)\",\"name\":\"(.+)\"}\'";
+    protected final  static  String body_match_json = "\\{\"id\":\"(\\d+)\",\"name\":\"(.+)\"\\}";
 
     protected static Pattern searchRegex;
 
@@ -29,6 +29,10 @@ public class Server {
     protected static byte[] _404;
     protected static byte[] _501;
     protected static byte[] _502;
+    /**
+     * 当传输类型为json时，发生错误的需要返回的字节，将字节数组读入BufferedReader中
+     */
+    protected static byte[] _error_json;
 
     public Server(String serverIp, int port) {
         this.port = port;
@@ -39,7 +43,8 @@ public class Server {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        searchRegex = Pattern.compile(search);  // 静态编译search正则表达式
+        // 静态编译search正则表达式
+        searchRegex = Pattern.compile(search);
 
         preReadFile();
     }
@@ -52,10 +57,12 @@ public class Server {
         File file404 = new File("static/404.html");
         File file501 = new File("static/501.html");
         File file502 = new File("static/502.html");
+        File error_json_file = new File("data/error.json");
         _403 = new byte[(int) file403.length()];
         _404 = new byte[(int) file404.length()];
         _501 = new byte[(int) file501.length()];
         _502 = new byte[(int) file502.length()];
+        _error_json = new byte[(int) error_json_file.length()];
 
         try {
             // 读403
@@ -71,6 +78,10 @@ public class Server {
             fin.close();
             fin = new BufferedInputStream(new FileInputStream(file502));
             fin.read(_502, 0, _502.length);
+            fin.close();
+            //读 error.json
+            fin = new BufferedInputStream(new FileInputStream(error_json_file));
+            fin.read(_error_json, 0, _error_json.length);
             fin.close();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
