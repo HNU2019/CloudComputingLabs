@@ -18,6 +18,7 @@ public class SocketThread implements Runnable {
             BufferedReader reader = new BufferedReader(new InputStreamReader(server.getInputStream()));
             BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(server.getOutputStream()));
 
+
             //第一行是请求行，格式是"method URL http版本"
             String str = reader.readLine();
             System.out.println("/***** request *****/\n" + str);

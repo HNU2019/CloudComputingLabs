@@ -9,9 +9,21 @@ import java.util.regex.Pattern;
 public class Server {
     private final int port;
     private ServerSocket listener;
-    protected final static String filePath = "/[^/\\:\\*\\?\"<>]*\\.[^/\\:\\*\\?\"<>]+"; //文件名的正则表达式
-    protected final static String search = "/api/search\\?(id=(\\d+))?&?(name=(.+))?";  //search的正则表达式
-    protected static Pattern searchRegex;
+    /**
+     * 文件名的正则表达式
+     */
+    protected final static String filePath = "/[^/\\:\\*\\?\"<>]*\\.[^/\\:\\*\\?\"<>]+";
+    /**
+    search的正则表达式
+     */
+    protected final static String search = "/api/search\\?(id=(\\d+))?&?(name=(.+))?";
+    /**
+     * 当类型为application/x-www-form-urlencoded时的body中的内容正则表达式
+     */
+    protected final  static  String body_match_form = "(id=(\\d+))?&?(name=(.+))?";
+    protected final  static  String body_match_json = "\'{\"id\":\"(\\d+)\",\"name\":\"(.+)\"}\'";
+
+    protected static Pattern searchRegex,body_match_regex;
 
     public Server(String serverIp, int port) {
         this.port = port;
@@ -23,6 +35,7 @@ public class Server {
             e.printStackTrace();
         }
         searchRegex = Pattern.compile(search);
+        body_match_regex = Pattern.compile(body_match_form);
     }
 
     public void Start() {
