@@ -22,6 +22,7 @@ public class SocketThread implements Runnable {
 
     /**
      * 读取文件并作为body发送
+     *
      * @param writer
      * @param file
      */
@@ -34,7 +35,7 @@ public class SocketThread implements Runnable {
             int length = 0;
             while (length < fileLength) {
                 length += fin.read(bytes, 0, bytes.length);
-                writer.write(new String(bytes,0,(length-1)%bytes.length+1));
+                writer.write(new String(bytes, 0, (length - 1) % bytes.length + 1));
             }
             fin.close();  //关闭文件输入流
         } catch (FileNotFoundException e) {
@@ -58,7 +59,8 @@ public class SocketThread implements Runnable {
                 ResponseOfGET doGet = new ResponseOfGET(request[1], request[2], reader, writer); // 不传入reader会引发阻塞
                 doGet.response();
             } else if (method.equals("POST")) {
-
+                ResponseOfPOST doPost = new ResponseOfPOST(request[1], request[2], reader, writer);
+                doPost.response();
             } else {
 
             }
