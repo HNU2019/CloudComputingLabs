@@ -2,6 +2,7 @@ package src.server;
 
 import java.io.*;
 import java.net.Socket;
+import java.net.SocketException;
 
 import static src.server.Server._501;
 
@@ -12,8 +13,8 @@ public class SocketThread implements Runnable {
 
     public SocketThread(Socket socket) {
         server = socket;
-        System.out.println("connected to remote address " + server.getRemoteSocketAddress());
-        System.out.println("local address is " + server.getLocalAddress() + ":" + server.getLocalPort() + '\n');
+//        System.out.println("connected to remote address " + server.getRemoteSocketAddress());
+//        System.out.println("local address is " + server.getLocalAddress() + ":" + server.getLocalPort() + '\n');
         try {
             reader = new BufferedReader(new InputStreamReader(server.getInputStream()));
             writer = new BufferedWriter(new OutputStreamWriter(server.getOutputStream()));
@@ -51,10 +52,8 @@ public class SocketThread implements Runnable {
     public void run() {
         try {
             String str = reader.readLine();  //第一行是请求行，格式是"method URL http版本"
-            System.out.println("/***** request *****/\n" + str);
+//            System.out.println("/***** request *****/\n" + str);
             String[] request = str.split("[ ]+", 3);
-//            for(String s:request) System.out.printf("%s ",s);
-//            System.out.println();
             String method = request[0];
 
             if (method.equals("GET")) {
@@ -72,7 +71,7 @@ public class SocketThread implements Runnable {
             }
 
             server.close();
-            System.out.println("connection has been closed.\n");
+//            System.out.println("connection has been closed.\n");
         } catch (IOException e) {
             e.printStackTrace();
         }
