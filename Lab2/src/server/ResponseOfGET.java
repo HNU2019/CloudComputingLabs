@@ -28,7 +28,7 @@ public class ResponseOfGET {
      * @param filename 文件名
      */
     private void sendFileContent(String filename) {
-        File file = new File("static/" + filename);
+        File file = new File("static" + filename);
         //判断文件是否存在
         if (!file.exists()) {
             sendNotFound();
@@ -139,7 +139,7 @@ public class ResponseOfGET {
             // 开始比较
 //            System.out.printf("%s %s\n",_id,_name);
             if ((id == null || _id.equals(id)) && (name == null || _name.equals(name))) {
-                ans.insert(ans.length()-1,String.format("{\"id\":%s,\"name\":\"%s\"}",_id,_name));
+                ans.insert(ans.length() - 1, String.format("{\"id\":%s,\"name\":\"%s\"}", _id, _name));
             }
         }
         if (ans.length() == 2) {  // 没有匹配的
@@ -154,12 +154,12 @@ public class ResponseOfGET {
             }
         } else {
             response.append(" 200 OK\r\n");
-            try{
+            try {
                 writer.write(response.toString());
                 writer.write(String.format("Content-Type: application/json\r\nContent-Length: %d\r\n\r\n", ans.length()));
                 writer.write(ans.toString());
                 writer.flush();
-            } catch(IOException e){
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         }
@@ -192,8 +192,8 @@ public class ResponseOfGET {
                 head = reader.readLine();
             }
             // 开始处理
-            if (url.charAt(url.length() - 1) == '/') { //请求的是目录
-                sendNotFound();
+            if (url.matches("/+")) {
+                sendFileContent("/index.html");
             } else if (url.equals("/api/check")) {
                 apiCheck();
             } else if (url.equals("/api/list")) {
