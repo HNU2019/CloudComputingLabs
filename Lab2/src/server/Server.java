@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
 public class Server {
     private final int port;
     private ServerSocket listener;
-    protected final static String filePath = "/([^/\\:\\*\\?\"<>]*)\\.([^/\\:\\*\\?\"<>]+)"; //文件名的正则表达式
+    protected final static String filePath = "/([^\\:\\*\\?\"<>]*)\\.([^/\\:\\*\\?\"<>]+)"; //文件名的正则表达式
     protected final static String search = "/api/search\\?(id=(\\d+))?&?(name=(.+))?";  //search的正则表达式
     /**
      * 当类型为application/x-www-form-urlencoded时的body中的内容正则表达式
@@ -35,7 +35,6 @@ public class Server {
         this.port = port;
         try {
             listener = new ServerSocket(port, 50, InetAddress.getByName(serverIp));
-//            listener = new ServerSocket(port);
             System.out.println("Local socket address is " + listener.getLocalSocketAddress());
         } catch (IOException e) {
             e.printStackTrace();
