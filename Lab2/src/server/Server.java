@@ -33,21 +33,29 @@ public class Server {
 
     public Server(String serverIp, int port) {
         this.port = port;
-        try {
-            listener = new ServerSocket();
-            listener.setReuseAddress(true);
-            SocketAddress socketAddress = new InetSocketAddress(serverIp, port);
-
-            listener.bind(socketAddress, 50);
+        while(true) {
+            try {
+                listener = new ServerSocket();
+                listener.setReuseAddress(true);
+                SocketAddress socketAddress = new InetSocketAddress(serverIp, port);
+                listener.bind(socketAddress, 50);
 //            System.out.println("Local socket address is " + listener.getLocalSocketAddress());
-        } catch (IOException e) {
-            e.printStackTrace();
+            } catch (IOException e) {
+
+            }
+            if(listener.isBound()) break;
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+
+            }
         }
         searchRegex = Pattern.compile(search);  // 静态编译search正则表达式
         fileRegex = Pattern.compile(filePath);
         preReadFile();
     }
 
+    
     /**
      * 服务器启动时将部分文件先读入到内存，403、404、501、502、data.txt
      */
@@ -106,17 +114,17 @@ public class Server {
 
     public void Start() {
         // 创建线程池
-        int coresNum = Runtime.getRuntime().availableProcessors(); //获取cpu核心数
-        LinkedBlockingQueue<Runnable> workQueue = new LinkedBlockingQueue<>(50);
-        ThreadPoolExecutor pool = new ThreadPoolExecutor(coresNum * 2 - 1, coresNum * 10 - 1,
-                10L, TimeUnit.MILLISECONDS, workQueue);
+        int coresNum=Runtime.getRuntime().availableProcessors(); //获取cpu核心数
+        LinkedBlockingQueue<Runnable> workQueue=new LinkedBlockingQueue<>(50);
+        ThreadPoolExecutor pool=new ThreadPoolExecutor(coresNum*2-1,coresNum*10-1,
+                10L, TimeUnit.MILLISECONDS,workQueue);
 
         while (true) {
             try {
 //                System.out.println("port [" + port + "] is waiting for connection...");
-                SocketThread connection = new SocketThread(listener.accept());
+                SocketThread connction = new SocketThread(listener.accept());
                 // 已连接到客户端
-                pool.submit(connection);
+                pool.submit(connction);
             } catch (IOException e) {
                 e.printStackTrace();
             }
