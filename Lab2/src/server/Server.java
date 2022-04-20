@@ -18,6 +18,7 @@ public class Server {
     protected final static String body_match_form = "(id=(\\d+))?&?(name=(.+))?";
     protected final static String body_match_json = "\\{\"id\":\\d+,\"name\":\".+\"\\}";
     protected static Pattern searchRegex;
+    protected static Pattern fileRegex;
     // 预先读入状态码文件
     protected static byte[] _403;
     protected static byte[] _404;
@@ -43,7 +44,7 @@ public class Server {
             e.printStackTrace();
         }
         searchRegex = Pattern.compile(search);  // 静态编译search正则表达式
-
+        fileRegex = Pattern.compile(filePath);
         preReadFile();
     }
 
