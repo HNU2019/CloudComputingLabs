@@ -1,9 +1,7 @@
 package src.server;
 
 import java.io.*;
-import java.net.InetAddress;
-import java.net.ServerSocket;
-import java.net.Socket;
+import java.net.*;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -35,7 +33,11 @@ public class Server {
     public Server(String serverIp, int port) {
         this.port = port;
         try {
-            listener = new ServerSocket(port, 50, InetAddress.getByName(serverIp));
+            listener = new ServerSocket();
+            listener.setReuseAddress(true);
+            SocketAddress socketAddress=new InetSocketAddress(serverIp,port);
+
+            listener.bind(socketAddress,50);
             System.out.println("Local socket address is " + listener.getLocalSocketAddress());
         } catch (IOException e) {
             e.printStackTrace();
@@ -111,10 +113,7 @@ public class Server {
         while (true) {
             try {
                 System.out.println("port [" + port + "] is waiting for connection...");
-                Socket temp=new Socket();
-                temp.setReuseAddress(true);
-                temp=listener.accept();
-                SocketThread connction = new SocketThread(temp);
+                SocketThread connction = new SocketThread(listener.accept());
                 // 已连接到客户端
                 pool.submit(connction);
             } catch (IOException e) {
