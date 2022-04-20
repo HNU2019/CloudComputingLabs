@@ -13,11 +13,6 @@ public class SocketThread implements Runnable {
 
     public SocketThread(Socket socket) {
         server = socket;
-        try {
-            server.setReuseAddress(true);
-        } catch (SocketException e) {
-            e.printStackTrace();
-        }
         System.out.println("connected to remote address " + server.getRemoteSocketAddress());
         System.out.println("local address is " + server.getLocalAddress() + ":" + server.getLocalPort() + '\n');
         try {

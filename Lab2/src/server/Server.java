@@ -3,6 +3,7 @@ package src.server;
 import java.io.*;
 import java.net.InetAddress;
 import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -110,7 +111,10 @@ public class Server {
         while (true) {
             try {
                 System.out.println("port [" + port + "] is waiting for connection...");
-                SocketThread connction = new SocketThread(listener.accept());
+                Socket temp=new Socket();
+                temp.setReuseAddress(true);
+                temp=listener.accept();
+                SocketThread connction = new SocketThread(temp);
                 // 已连接到客户端
                 pool.submit(connction);
             } catch (IOException e) {
