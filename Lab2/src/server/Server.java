@@ -117,8 +117,6 @@ public class Server {
                 SocketThread connection = new SocketThread(listener.accept());
                 // 已连接到客户端
                 pool.submit(connection);
-            } catch (SocketException e) {
-
             } catch (IOException e) {
                 e.printStackTrace();
             }
