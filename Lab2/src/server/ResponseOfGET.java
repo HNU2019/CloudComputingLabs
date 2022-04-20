@@ -28,6 +28,7 @@ public class ResponseOfGET {
      * @param filename 文件名
      */
     private void sendFileContent(String filename) {
+        if(filename.equals("/")) filename="/index.html";
         File file = new File("static/" + filename);
         //判断文件是否存在
         if (!file.exists()) {
@@ -192,9 +193,7 @@ public class ResponseOfGET {
                 head = reader.readLine();
             }
             // 开始处理
-            if (url.charAt(url.length() - 1) == '/') { //请求的是目录
-                sendNotFound();
-            } else if (url.equals("/api/check")) {
+            if (url.equals("/api/check")) {
                 apiCheck();
             } else if (url.equals("/api/list")) {
                 apiList();
