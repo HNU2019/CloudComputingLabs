@@ -17,7 +17,7 @@ public class Server {
      * 当类型为application/x-www-form-urlencoded时的body中的内容正则表达式
      */
     protected final static String body_match_form = "(id=(\\d+))?&?(name=(.+))?";
-    protected final static String body_match_json = "\\{\"id\":\"(\\d+)\",\"name\":\"(.+)\"\\}";
+    protected final static String body_match_json = "\\{\"id\":\\d+,\"name\":\".+\"\\}";
     protected static Pattern searchRegex;
     // 预先读入状态码文件
     protected static byte[] _403;
