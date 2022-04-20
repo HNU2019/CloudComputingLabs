@@ -28,7 +28,7 @@ public class ResponseOfGET {
      * @param filename 文件名
      */
     private void sendFileContent(String filename) {
-        File file = new File("static" + filename);
+        File file = new File("static/" + filename);
         //判断文件是否存在
         if (!file.exists()) {
             sendNotFound();
@@ -39,13 +39,11 @@ public class ResponseOfGET {
         response.append(httpVersion);  //http版本
         String type = "";
 
-        Pattern fileRegex = Pattern.compile(filePath);
-        Matcher m = fileRegex.matcher(url);
+        Matcher m = fileRegex.matcher(filename);
         if (m.find()) {
             String left = m.group(1);   // 文件名
             String right = m.group(2);  // 文件格式
-//            System.out.println(left);
-//            System.out.println(right);
+//            System.out.print(left+" "+right+"\n");
             if (left.equals("403")) {
                 response.append(" 403 Forbidden\r\n");
             } else if (left.equals("404")) {
