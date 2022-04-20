@@ -33,12 +33,21 @@ public class Server {
 
     public Server(String serverIp, int port) {
         this.port = port;
-        while(!myBind(serverIp)){
+        while(true) {
             try {
-                System.out.println("还没绑上呢");
-                Thread.sleep(100);
+                listener = new ServerSocket();
+                listener.setReuseAddress(true);
+                SocketAddress socketAddress = new InetSocketAddress(serverIp, port);
+                listener.bind(socketAddress, 50);
+//            System.out.println("Local socket address is " + listener.getLocalSocketAddress());
+            } catch (IOException e) {
+
+            }
+            if(listener.isBound()) break;
+            try {
+                Thread.sleep(1000);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+
             }
         }
         searchRegex = Pattern.compile(search);  // 静态编译search正则表达式
@@ -46,19 +55,7 @@ public class Server {
         preReadFile();
     }
 
-    private boolean myBind(String serverIp){
-        try {
-            listener = new ServerSocket();
-            listener.setReuseAddress(true);
-            SocketAddress socketAddress=new InetSocketAddress(serverIp,port);
-            listener.bind(socketAddress,50);
-//            System.out.println("Local socket address is " + listener.getLocalSocketAddress());
-        } catch (IOException e) {
-            return false;
-        }
-        return true;
-    }
-
+    
     /**
      * 服务器启动时将部分文件先读入到内存，403、404、501、502、data.txt
      */
