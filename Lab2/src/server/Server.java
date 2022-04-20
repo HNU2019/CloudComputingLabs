@@ -38,7 +38,7 @@ public class Server {
             SocketAddress socketAddress=new InetSocketAddress(serverIp,port);
 
             listener.bind(socketAddress,50);
-            System.out.println("Local socket address is " + listener.getLocalSocketAddress());
+//            System.out.println("Local socket address is " + listener.getLocalSocketAddress());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -112,7 +112,7 @@ public class Server {
 
         while (true) {
             try {
-                System.out.println("port [" + port + "] is waiting for connection...");
+//                System.out.println("port [" + port + "] is waiting for connection...");
                 SocketThread connction = new SocketThread(listener.accept());
                 // 已连接到客户端
                 pool.submit(connction);
