@@ -41,11 +41,11 @@ public class ResponseOfPOST {
             StringBuilder request_body = new StringBuilder();
             String head = reader.readLine();
             String data_type = "";
-            System.out.println(head);
+//            System.out.println(head);
 
             while (!head.equals("")) {
                 head = reader.readLine();
-                System.out.println(head);
+//                System.out.println(head);
                 if (Pattern.matches("Content-Length:.*", head)) {
                     body_length = Integer.parseInt(head.substring(16));
                 }
@@ -57,7 +57,7 @@ public class ResponseOfPOST {
                 request_body.append((char) reader.read());
             }
 
-            System.out.println(request_body);
+//            System.out.println(request_body);
 
             // 开始处理
             if (url.equals("/api/echo")) {
