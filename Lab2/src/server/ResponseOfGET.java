@@ -188,9 +188,7 @@ public class ResponseOfGET {
         try {
             String head = reader.readLine();
             while (!head.equals("")) {
-//                String[] temp = head.split(":[ ]*", 2);
-//                System.out.println(temp[0] + ":" + temp[1]);
-                System.out.println(head);
+//                System.out.println(head);
                 head = reader.readLine();
             }
             // 开始处理
@@ -207,8 +205,6 @@ public class ResponseOfGET {
                 if (m.find()) {
                     String id = m.group(2);    //为空则为null
                     String name = m.group(4);  //为空则为null
-//                    System.out.println("id = " + id);
-//                    System.out.println("name = " + name);
                     apiSearch(id, name);
                 }
             } else {
