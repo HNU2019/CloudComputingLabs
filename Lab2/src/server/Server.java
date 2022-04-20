@@ -33,19 +33,30 @@ public class Server {
 
     public Server(String serverIp, int port) {
         this.port = port;
-        try {
-            listener = new ServerSocket();
-            listener.setReuseAddress(true);
-            SocketAddress socketAddress=new InetSocketAddress(serverIp,port);
-
-            listener.bind(socketAddress,50);
-//            System.out.println("Local socket address is " + listener.getLocalSocketAddress());
-        } catch (IOException e) {
-            e.printStackTrace();
+        while(!myBind(serverIp)){
+            try {
+                System.out.println("还没绑上呢");
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
         searchRegex = Pattern.compile(search);  // 静态编译search正则表达式
         fileRegex = Pattern.compile(filePath);
         preReadFile();
+    }
+
+    private boolean myBind(String serverIp){
+        try {
+            listener = new ServerSocket();
+            listener.setReuseAddress(true);
+            SocketAddress socketAddress=new InetSocketAddress(serverIp,port);
+            listener.bind(socketAddress,50);
+//            System.out.println("Local socket address is " + listener.getLocalSocketAddress());
+        } catch (IOException e) {
+            return false;
+        }
+        return true;
     }
 
     /**
