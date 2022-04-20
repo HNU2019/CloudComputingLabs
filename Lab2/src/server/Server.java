@@ -36,9 +36,9 @@ public class Server {
         try {
             listener = new ServerSocket();
             listener.setReuseAddress(true);
-            SocketAddress socketAddress=new InetSocketAddress(serverIp,port);
+            SocketAddress socketAddress = new InetSocketAddress(serverIp, port);
 
-            listener.bind(socketAddress,50);
+            listener.bind(socketAddress, 50);
 //            System.out.println("Local socket address is " + listener.getLocalSocketAddress());
         } catch (IOException e) {
             e.printStackTrace();
@@ -106,17 +106,19 @@ public class Server {
 
     public void Start() {
         // 创建线程池
-        int coresNum=Runtime.getRuntime().availableProcessors(); //获取cpu核心数
-        LinkedBlockingQueue<Runnable> workQueue=new LinkedBlockingQueue<>(50);
-        ThreadPoolExecutor pool=new ThreadPoolExecutor(coresNum*2-1,coresNum*10-1,
-                10L, TimeUnit.MILLISECONDS,workQueue);
+        int coresNum = Runtime.getRuntime().availableProcessors(); //获取cpu核心数
+        LinkedBlockingQueue<Runnable> workQueue = new LinkedBlockingQueue<>(50);
+        ThreadPoolExecutor pool = new ThreadPoolExecutor(coresNum * 2 - 1, coresNum * 10 - 1,
+                10L, TimeUnit.MILLISECONDS, workQueue);
 
         while (true) {
             try {
 //                System.out.println("port [" + port + "] is waiting for connection...");
-                SocketThread connction = new SocketThread(listener.accept());
+                SocketThread connection = new SocketThread(listener.accept());
                 // 已连接到客户端
-                pool.submit(connction);
+                pool.submit(connection);
+            } catch (SocketException e) {
+
             } catch (IOException e) {
                 e.printStackTrace();
             }
