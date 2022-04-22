@@ -8,6 +8,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 public class Server {
+    private final String ip;
     private final int port;
     private ServerSocket listener;
     protected final static String filePath = "/([^\\:\\*\\?\"<>]*)\\.([^/\\:\\*\\?\"<>]+)"; //文件名的正则表达式
@@ -32,30 +33,29 @@ public class Server {
     protected static byte[] _error_json;
 
     public Server(String serverIp, int port) {
+        this.ip=serverIp;
         this.port = port;
-        while(true) {
-            try {
-                listener = new ServerSocket();
-                listener.setReuseAddress(true);
-                SocketAddress socketAddress = new InetSocketAddress(serverIp, port);
-                listener.bind(socketAddress, 50);
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            listener = new ServerSocket();
+            listener.setReuseAddress(true);
+            SocketAddress socketAddress = new InetSocketAddress(serverIp, port);
+            listener.bind(socketAddress, 50);
 //            System.out.println("Local socket address is " + listener.getLocalSocketAddress());
-            } catch (IOException e) {
+        } catch (IOException e) {
 
-            }
-            if(listener.isBound()) break;
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-
-            }
         }
         searchRegex = Pattern.compile(search);  // 静态编译search正则表达式
         fileRegex = Pattern.compile(filePath);
         preReadFile();
     }
 
-    
+
     /**
      * 服务器启动时将部分文件先读入到内存，403、404、501、502、data.txt
      */
@@ -125,7 +125,16 @@ public class Server {
                 SocketThread connction = new SocketThread(listener.accept());
                 // 已连接到客户端
                 pool.submit(connction);
-            } catch (IOException e) {
+            }catch (BindException e){
+                try {
+                    SocketAddress socketAddress = new InetSocketAddress(ip, port);
+                    listener.bind(socketAddress, 50);
+//            System.out.println("Local socket address is " + listener.getLocalSocketAddress());
+                } catch (IOException e2) {
+
+                }
+            }
+            catch (IOException e) {
                 e.printStackTrace();
             }
         }

@@ -51,23 +51,26 @@ public class SocketThread implements Runnable {
     @Override
     public void run() {
         try {
-            String str = reader.readLine();  //第一行是请求行，格式是"method URL http版本"
-//            System.out.println("/***** request *****/\n" + str);
-            String[] request = str.split("[ ]+", 3);
-            String method = request[0];
+            while (true){
+                String str = reader.readLine();  //第一行是请求行，格式是"method URL http版本"
+                if(str.equals("")) break;
+//                System.out.println("/***** request *****/\n" + str);
+                String[] request = str.split("[ ]+", 3);
+                String method = request[0];
 
-            if (method.equals("GET")) {
-                ResponseOfGET doGet = new ResponseOfGET(request[1], request[2], reader, writer); // 不传入reader会引发阻塞
-                doGet.response();
-            } else if (method.equals("POST")) {
-                ResponseOfPOST doPost = new ResponseOfPOST(request[1], request[2], reader, writer);
-                doPost.response();
-            } else {  // 其他方法返回501
-                StringBuilder response=new StringBuilder(request[2]+" 501 Not Implemented\r\n");
-                response.append(String.format("Content-Type: text/html\r\nContent-Length: %d\r\n\r\n",_501.length));
-                writer.write(response.toString());
-                writer.write(new String(_501));
-                writer.flush();
+                if (method.equals("GET")) {
+                    ResponseOfGET doGet = new ResponseOfGET(request[1], request[2], reader, writer); // 不传入reader会引发阻塞
+                    doGet.response();
+                } else if (method.equals("POST")) {
+                    ResponseOfPOST doPost = new ResponseOfPOST(request[1], request[2], reader, writer);
+                    doPost.response();
+                } else {  // 其他方法返回501
+                    StringBuilder response = new StringBuilder(request[2] + " 501 Not Implemented\r\n");
+                    response.append(String.format("Content-Type: text/html\r\nContent-Length: %d\r\n\r\n", _501.length));
+                    writer.write(response.toString());
+                    writer.write(new String(_501));
+                    writer.flush();
+                }
             }
 
             server.close();
